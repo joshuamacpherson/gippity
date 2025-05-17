@@ -33,7 +33,7 @@ app.get("/", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
 
   const stream = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: recentMessages,
     stream: true,
   });
