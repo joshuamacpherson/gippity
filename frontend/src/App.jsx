@@ -43,7 +43,7 @@ function App() {
     streamedContentRef.current = "";
 
     const res = await fetch(
-      `https://gippity-production.up.railway.app?message=${encodeURIComponent(
+      `https://localhost:5000?message=${encodeURIComponent(
         userMessage
       )}`
     );
