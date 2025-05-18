@@ -1,5 +1,7 @@
 ## gippity
 
+### still wip, no auth yet
+
 simple chat bot using react and node.js to practice API integration, data streaming, and styling
 
 supports markdown for coding questions
