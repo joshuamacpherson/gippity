@@ -9,26 +9,33 @@ const port = 5000;
 app.use(express.json());
 
 const chatHistory = [];
+
+// only storing 20 msgs
 const MAX_HISTORY = 20;
 
 app.get("/", async (req, res) => {
   const userMessage = req.query.message;
 
+  // in case i messed up anything in the frontend 
   if (!userMessage || typeof userMessage !== "string") {
     return res.status(400).json({ error: "Invalid message" });
   }
 
+  // whatever prompt you want
   const systemPrompt = {
     role: "system",
     content: process.env.SYSTEM_PROMPT,
   };
 
+  // your key here 
   const openai = new OpenAI({ apiKey: process.env.TOKEN });
 
   chatHistory.push({ role: "user", content: userMessage });
 
+  // again only 20 msgs 
   const recentMessages = [systemPrompt, ...chatHistory.slice(-MAX_HISTORY)];
 
+  // for cors, needs to go (not safe)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Content-Type", "application/json");
 
@@ -40,6 +47,7 @@ app.get("/", async (req, res) => {
 
   let assistantReply = "";
 
+  // streaminggggg
   for await (const chunk of stream) {
     const content = chunk.choices?.[0]?.delta?.content;
     if (content) {
