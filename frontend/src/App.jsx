@@ -3,23 +3,26 @@ import MarkdownRender from "./MarkdownRender";
 import { useState, useEffect, useRef } from "react";
 
 function App() {
+  /*
+    message storage, if empty return empty array
+  */
   const [messages, setMessages] = useState(() => {
     const stored = localStorage.getItem("chatMessages");
     return stored ? JSON.parse(stored) : [];
   });
 
   const messageRef = useRef("");
-  const bottomRef = useRef(null);
+  const bottomRef = useRef(null); // for autoscroll down on msg streaming
   const streamedContentRef = useRef("");
 
-  useEffect(() => {
+  useEffect(() => { // loading messages
     const data = localStorage.getItem("chatMessages");
     if (data) {
       setMessages(JSON.parse(data));
     }
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { // storing messages
     localStorage.setItem("chatMessages", JSON.stringify(messages));
   }, [messages]);
 
@@ -42,6 +45,7 @@ function App() {
 
     streamedContentRef.current = "";
 
+    // do not change this unless you plan on adding auth
     const res = await fetch(
       `https://localhost:5000?message=${encodeURIComponent(
         userMessage
@@ -56,6 +60,7 @@ function App() {
     const reader = res.body.getReader();
     const decoder = new TextDecoder("utf-8");
 
+    // message streaming
     const readStream = async () => {
       while (true) {
         const { done, value } = await reader.read();
@@ -63,7 +68,7 @@ function App() {
 
         const chunk = decoder.decode(value, { stream: true });
         streamedContentRef.current += chunk;
-
+        
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
@@ -83,7 +88,7 @@ function App() {
 
     await readStream();
   }
-
+  
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -96,12 +101,14 @@ function App() {
     sendPrompt(messageRef.current);
   };
 
+  // auto scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
     <>
+      {/* clear that button that wipes localstorage */}
       <button
         className="absolute btn btn-error btn-lg right-8 top-8 text-xl font-[Inter]"
         onClick={() => {
@@ -111,11 +118,15 @@ function App() {
       >
         Clear Chat
       </button>
+
+      {/* top left icon */}
       <div className="absolute top-6 left-6 text-6xl font-bold z-50">
         gippity
       </div>
       <div className=" flex flex-col h-screen items-center">
         <div className="relative flex-1 w-[40%] overflow-y-auto px-7 py-7 rounded-3xl p-6 scroll-hide scroll-smooth">
+
+          {/* messages */}
           <div className="flex flex-col space-y-3 font-[Inter]">
             {messages.map((msg, index) => (
               <div
@@ -133,6 +144,8 @@ function App() {
                 )}
               </div>
             ))}
+            
+            {/* for auto scroll */}
             <div ref={bottomRef} />
           </div>
         </div>
